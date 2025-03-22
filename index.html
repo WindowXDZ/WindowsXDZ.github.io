@@ -75,16 +75,22 @@
 
                 // Once all 4 answers are entered, send the request
                 if (answerCount === 4) {
-                    fetch('https://darkzvault-api.vercel.app/api?s=' + answers.join('-'))
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.results.every(result => result === true) && data.message === "Verification complete") {
-                                // Hide the input box and show file explorer
-                                inputBox.style.display = 'none';
-                                fileExplorer.style.display = 'block';
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
+                    fetch('https://darkzvault-api.vercel.app/api?s=' + answers.join('-'), {
+                        method: 'GET',  // Or 'POST' depending on your API
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        mode: 'cors'  // This enables cross-origin resource sharing
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.results.every(result => result === true) && data.message === "Verification complete") {
+                            // Hide the input box and show file explorer
+                            inputBox.style.display = 'none';
+                            fileExplorer.style.display = 'block';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
                 }
             }
         });
