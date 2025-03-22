@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkzVault Verification</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #input-box {
+            text-align: center;
+            margin-top: 50px;
+        }
+        #answers {
+            padding: 10px;
+            border: 2px solid green;
+            background: black;
+            color: white;
+            font-size: 20px;
+            width: 300px;
+            text-align: center;
+        }
+        #file-explorer {
+            display: none;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #file-explorer p {
+            font-size: 18px;
+        }
+        #download-file {
+            cursor: pointer;
+            color: green;
+            font-size: 18px;
+            margin-top: 20px;
+            display: inline-block;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="input-box">
+        <input type="text" id="answers" placeholder="Answer 1" />
+    </div>
+
+    <div id="file-explorer">
+        <p>File Explorer:</p>
+        <div id="download-file" onclick="copyToClipboard()">zweo_discord_pass.txt - Click to copy</div>
+    </div>
+
+    <script>
+        let answerCount = 0;
+        let answers = [];
+
+        const textbox = document.getElementById('answers');
+        const inputBox = document.getElementById('input-box');
+        const fileExplorer = document.getElementById('file-explorer');
+        const downloadFile = document.getElementById('download-file');
+
+        textbox.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter' && answerCount < 4) {
+                event.preventDefault();
+                answers.push(textbox.value.trim());
+                answerCount++;
+                textbox.value = '';
+
+                // Once all 4 answers are entered, send the request
+                if (answerCount === 4) {
+                    fetch('https://darkzvault-api.vercel.app/api?s=' + answers.join('-'))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.results.every(result => result === true) && data.message === "Verification complete") {
+                                // Hide the input box and show file explorer
+                                inputBox.style.display = 'none';
+                                fileExplorer.style.display = 'block';
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+            }
+        });
+
+        function copyToClipboard() {
+            // Create a temporary textarea element to select the text
+            const textarea = document.createElement('textarea');
+            textarea.value = 'WIP';  // Content of the file
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            // Notify the user that the content has been copied
+            alert('Content copied to clipboard!');
+        }
+    </script>
+
+</body>
+</html>
