@@ -17,7 +17,6 @@
         }
         #input-box {
             text-align: center;
-            margin-top: 50px;
         }
         #answers {
             padding: 10px;
@@ -33,15 +32,11 @@
             text-align: center;
             margin-top: 50px;
         }
-        #file-explorer p {
-            font-size: 18px;
-        }
         #download-file {
             cursor: pointer;
             color: green;
             font-size: 18px;
             margin-top: 20px;
-            display: inline-block;
             text-decoration: underline;
         }
     </style>
@@ -49,7 +44,7 @@
 <body>
 
     <div id="input-box">
-        <input type="text" id="answers" placeholder="Answer 1" />
+        <input type="text" id="answers" placeholder="Enter answers (one by one)..." />
     </div>
 
     <div id="file-explorer">
@@ -60,11 +55,9 @@
     <script>
         let answerCount = 0;
         let answers = [];
-
         const textbox = document.getElementById('answers');
         const inputBox = document.getElementById('input-box');
         const fileExplorer = document.getElementById('file-explorer');
-        const downloadFile = document.getElementById('download-file');
 
         textbox.addEventListener('keypress', function (event) {
             if (event.key === 'Enter' && answerCount < 4) {
@@ -73,39 +66,43 @@
                 answerCount++;
                 textbox.value = '';
 
-                // Once all 4 answers are entered, send the request
                 if (answerCount === 4) {
-                    fetch('https://darkzvault-api.vercel.app/api?s=' + answers.join('-'), {
-                        method: 'GET',  // Or 'POST' depending on your API
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        mode: 'cors'  // This enables cross-origin resource sharing
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.results.every(result => result === true) && data.message === "Verification complete") {
-                            // Hide the input box and show file explorer
-                            inputBox.style.display = 'none';
-                            fileExplorer.style.display = 'block';
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
+                    verifyAnswers();
                 }
             }
         });
 
-        function copyToClipboard() {
-            // Create a temporary textarea element to select the text
-            const textarea = document.createElement('textarea');
-            textarea.value = 'WIP';  // Content of the file
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
+        function verifyAnswers() {
+            fetch(`https://darkzvault-api.vercel.app/api?s=${answers.join('-')}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.results && data.results.every(result => result === true)) {
+                    inputBox.style.display = 'none';
+                    fileExplorer.style.display = 'block';
+                } else {
+                    alert('Verification failed! Try again.');
+                    resetInputs();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error verifying. Check the API.');
+            });
+        }
 
-            // Notify the user that the content has been copied
-            alert('Content copied to clipboard!');
+        function resetInputs() {
+            answerCount = 0;
+            answers = [];
+            textbox.value = '';
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText("WIP")
+                .then(() => alert("Content copied to clipboard!"))
+                .catch(err => console.error("Clipboard copy failed:", err));
         }
     </script>
 
